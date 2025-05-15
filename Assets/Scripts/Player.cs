@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.Services.Analytics.Internal;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -10,12 +11,25 @@ public class Player : MonoBehaviour
     public float speed = 3f; // move speed
     public bool isAuto;
     //bool hitting; // boolean to know if we are hitting the ball or not 
-    Animator animator;
+    private Animator animator;
     public Vector3 initPos;
-    Vector3 aimTargetInitialPosition; // initial position of the aiming gameObject which is the center of the opposite court
+    private Vector3 aimTargetInitialPosition; // initial position of the aiming gameObject which is the center of the opposite court
 
-    ShotManager shotManager; // reference to the shotmanager component
+    private ShotManager shotManager; // reference to the shotmanager component
     public Shot currentShot; // the current shot we are playing to acces it's attributes
+    [Header("追球參數")]
+    public float startChaseRadius = 6f;       // 開始追球的觸發距離
+    public float maxReachDistance = 8f;       // 正常奔跑可及距離
+    public float diveReachDistance = 12f;     // 飛撲可及最遠距離
+    public float predictTime = 1.0f;          // 落點預測時間
+
+    [Header("飛撲參數")]
+    public float diveDuration = 0.5f;         // 飛撲動作持續時間
+    public float diveSpeedMultiplier = 2.5f;  // 飛撲速度倍率
+    public float diveCooldown = 2.0f;         // 飛撲後冷卻時間
+
+    private bool isChasing = false;
+    private bool isDiving = false;
 
     private void Start()
     {
@@ -27,7 +41,7 @@ public class Player : MonoBehaviour
         Ball.OnBCollided += ResetPosition;
     }
 
-    void Update()
+    private void Update()
     {
         if (isAuto)
         {
@@ -53,17 +67,54 @@ public class Player : MonoBehaviour
     private void ResetPosition()
     {
         transform.position = initPos;
+        isChasing = false;
     }
-    void Move()
+    private void Move()
     {
         Vector3 targetPosition = ball.position;// update the target position to the ball's x position so the bot only moves on the x axis
-        if (targetPosition.z > -5)
+        float distToBall = Vector3.Distance(transform.position, targetPosition);
+        // 1. 初步觸發追球
+        if (!isChasing && distToBall <= startChaseRadius)
         {
-            targetPosition.z = -5;
+            isChasing = true;
+            Chasing();
         }
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime); // lerp it's position
+        //transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime); // lerp it's position
     }
+    private void Chasing()
+    {
+        // 2. 落點預測
+        Vector3 predictedPos = PredictBallPosition(predictTime);
+        float distToIntercept = Vector3.Distance(transform.position, predictedPos);
 
+        // 3a. 正常奔跑可及
+        if (distToIntercept <= maxReachDistance)
+        {
+            animator.SetBool("IsRunning", true);
+            transform.position = Vector3.MoveTowards(transform.position, ball.position, speed * Time.deltaTime); // lerp it's position
+        }
+        // 3b. 飛撲可及
+        //else if (!diveOnCooldown && distToIntercept <= diveReachDistance)
+        //{
+        //    StartCoroutine(DoDive(predictedPos));
+        //}
+        // 3c. 超出可及範圍 → 放棄
+        else if (distToIntercept > diveReachDistance)
+        {
+            StopChase();
+        }
+
+    }
+    Vector3 PredictBallPosition(float t)
+    {
+        Rigidbody rb = ball.GetComponent<Rigidbody>();
+        return ball.position + rb.velocity * t + 0.5f * t * t * Physics.gravity;
+    }
+    void StopChase()
+    {
+        isChasing = false;
+        transform.position = Vector3.MoveTowards(transform.position, initPos, speed * Time.deltaTime); // lerp it's position
+    }
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Ball")) // if we collide with the ball 
