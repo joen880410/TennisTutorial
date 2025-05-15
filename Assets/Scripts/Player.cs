@@ -29,8 +29,7 @@ public class Player : MonoBehaviour
     public float diveCooldown = 2.0f;         // 飛撲後冷卻時間
 
     private bool isChasing = false;
-    private bool isDiving = false;
-
+    private bool isReset = false;
     private void Start()
     {
         animator = GetComponent<Animator>(); // referennce out animator
@@ -43,6 +42,15 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        if (isReset)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, initPos, speed * 10 * Time.deltaTime); // lerp it's position
+            if (transform.position == initPos)
+            {
+                isReset = false;
+            }
+            return;
+        }
         if (isAuto)
         {
             Move();
@@ -66,7 +74,7 @@ public class Player : MonoBehaviour
     }
     private void ResetPosition()
     {
-        transform.position = initPos;
+        isReset = true;
         isChasing = false;
     }
     private void Move()
@@ -77,9 +85,11 @@ public class Player : MonoBehaviour
         if (!isChasing && distToBall <= startChaseRadius)
         {
             isChasing = true;
+        }
+        if (isChasing)
+        {
             Chasing();
         }
-        //transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime); // lerp it's position
     }
     private void Chasing()
     {
@@ -91,13 +101,13 @@ public class Player : MonoBehaviour
         if (distToIntercept <= maxReachDistance)
         {
             animator.SetBool("IsRunning", true);
-            transform.position = Vector3.MoveTowards(transform.position, ball.position, speed * Time.deltaTime); // lerp it's position
+            transform.position = Vector3.MoveTowards(transform.position, predictedPos, speed * Time.deltaTime); // lerp it's position
         }
         // 3b. 飛撲可及
-        //else if (!diveOnCooldown && distToIntercept <= diveReachDistance)
-        //{
-        //    StartCoroutine(DoDive(predictedPos));
-        //}
+        else if (distToIntercept <= diveReachDistance)
+        {
+            DoDive(predictedPos);
+        }
         // 3c. 超出可及範圍 → 放棄
         else if (distToIntercept > diveReachDistance)
         {
@@ -132,11 +142,41 @@ public class Player : MonoBehaviour
             {
                 animator.Play("backhand");
             }
-
-            aimTarget.position = aimTargetInitialPosition; // reset the position of the aiming gameObject to it's original position ( center)
-
+            StopChase();
+            //aimTarget.position = aimTargetInitialPosition; // reset the position of the aiming gameObject to it's original position ( center)
         }
     }
+    private void DoDive(Vector3 targetPos)
+    {
+        float elapsed = 0f;
+        Vector3 startPos = transform.position;
+        Vector3 dir = (targetPos - startPos).normalized;
+        float diveSpeed = speed * diveSpeedMultiplier;
+        transform.position = Vector3.MoveTowards(transform.position, targetPos, diveSpeed * Time.deltaTime); // lerp it's position
+        //while (elapsed < diveDuration)
+        //{
+        //    transform.position += diveSpeed * Time.deltaTime * dir;
+        //    elapsed += Time.deltaTime;
+        //}
 
+        // 飛撲結束後
+    }
+    private void OnDrawGizmosSelected()
+    {
+        Vector3 center = transform.position;
+        // 最外圈：放棄範圍
+        Gizmos.color = new Color(1f, 1f, 1f, 0.5f); // 橘色半透明
+        Gizmos.DrawWireSphere(center, diveReachDistance);
+        // 外圈：飛撲範圍
+        Gizmos.color = new Color(1f, 0.5f, 0f, 0.3f); // 橘色半透明
+        Gizmos.DrawWireSphere(center, diveReachDistance);
 
+        // 中圈：正常可達
+        Gizmos.color = new Color(0f, 0.7f, 1f, 0.5f); // 藍色半透明
+        Gizmos.DrawWireSphere(center, maxReachDistance);
+
+        // 內圈：開始追球
+        Gizmos.color = new Color(0f, 1f, 0f, 0.6f); // 綠色半透明
+        Gizmos.DrawWireSphere(center, startChaseRadius);
+    }
 }

@@ -27,7 +27,7 @@ public class PlayerMovementLimiter : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
         if (boundsCollider != null)
         {

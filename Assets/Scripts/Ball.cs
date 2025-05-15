@@ -4,7 +4,7 @@ using UnityEngine;
 public class Ball : MonoBehaviour
 {
     public static event Action OnBCollided;
-    Vector3 initialPos; // ball's initial position
+    private Vector3 initialPos; // ball's initial position
 
     private void Start()
     {
