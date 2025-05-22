@@ -30,6 +30,7 @@ public class Player : MonoBehaviour
 
     private bool isChasing = false;
     private bool isReset = false;
+    private bool isWithAtk;
     private void Start()
     {
         animator = GetComponent<Animator>(); // referennce out animator
@@ -38,6 +39,7 @@ public class Player : MonoBehaviour
         currentShot = shotManager.topSpin; // defaulting our current shot as topspin
         initPos = transform.position;
         Ball.OnBCollided += ResetPosition;
+        Serve();
     }
 
     private void Update()
@@ -61,8 +63,39 @@ public class Player : MonoBehaviour
             float v = Input.GetAxisRaw("Vertical"); // get the vertical axis of the keyboard
             transform.Translate(new Vector3(h, 0, v) * speed * Time.deltaTime);
         }
+        if (Input.GetKeyDown(KeyCode.Q)) 
+        {
+            Vector3 ballDir = ball.position - transform.position;
+            if (isWithAtk) 
+            {
+                Debug.Log("成功");
+                Vector3 dir = aimTarget.position - transform.position; // get the direction to where we want to send the ball
+                ball.GetComponent<Rigidbody>().velocity = dir.normalized * currentShot.hitForce + new Vector3(0, currentShot.upForce, 0);
+                //add force to the ball plus some upward force according to the shot being played
+
+                // get the direction of the ball compared to us to know if it is
+                StopChase();
+            }
+
+            if (ballDir.x >= 0)                                   // on out right or left side 
+            {
+                animator.Play("forehand");                        // play a forhand animation if the ball is on our right
+            }
+            else                                                  // otherwise play a backhand animation 
+            {
+                animator.Play("backhand");
+            }
+
+            //aimTarget.position = aimTargetInitialPosition; // reset the position of the aiming gameObject to it's original position ( center)
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Serve();
+        }
+
         if (Input.GetKeyDown(KeyCode.F))
         {
+            
             currentShot = shotManager.topSpin; // set our current shot to top spin
         }
 
@@ -71,6 +104,27 @@ public class Player : MonoBehaviour
             currentShot = shotManager.flat; // set our current shot to top spin
         }
 
+    }
+    private void Serve() 
+    {
+        Vector3 ballDir = ball.position - transform.position;
+        
+        Vector3 dir = aimTarget.position - transform.position; // get the direction to where we want to send the ball
+        ball.GetComponent<Rigidbody>().velocity = dir.normalized * currentShot.hitForce + new Vector3(0, currentShot.upForce, 0);
+        //add force to the ball plus some upward force according to the shot being played
+
+        // get the direction of the ball compared to us to know if it is
+        
+
+        if (ballDir.x >= 0)                                   // on out right or left side 
+        {
+            animator.Play("forehand");                        // play a forhand animation if the ball is on our right
+        }
+        else                                                  // otherwise play a backhand animation 
+        {
+            animator.Play("backhand");
+        }
+        StopChase();
     }
     private void ResetPosition()
     {
@@ -122,6 +176,7 @@ public class Player : MonoBehaviour
     }
     void StopChase()
     {
+        isWithAtk = false;
         isChasing = false;
         transform.position = Vector3.MoveTowards(transform.position, initPos, speed * Time.deltaTime); // lerp it's position
     }
@@ -129,21 +184,14 @@ public class Player : MonoBehaviour
     {
         if (other.CompareTag("Ball")) // if we collide with the ball 
         {
-            Vector3 dir = aimTarget.position - transform.position; // get the direction to where we want to send the ball
-            other.GetComponent<Rigidbody>().velocity = dir.normalized * currentShot.hitForce + new Vector3(0, currentShot.upForce, 0);
-            //add force to the ball plus some upward force according to the shot being played
-
-            Vector3 ballDir = ball.position - transform.position; // get the direction of the ball compared to us to know if it is
-            if (ballDir.x >= 0)                                   // on out right or left side 
-            {
-                animator.Play("forehand");                        // play a forhand animation if the ball is on our right
-            }
-            else                                                  // otherwise play a backhand animation 
-            {
-                animator.Play("backhand");
-            }
-            StopChase();
-            //aimTarget.position = aimTargetInitialPosition; // reset the position of the aiming gameObject to it's original position ( center)
+            isWithAtk = true;
+        }
+    }
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Ball") && isChasing) // if we collide with the ball 
+        {
+            isWithAtk = false;
         }
     }
     private void DoDive(Vector3 targetPos)

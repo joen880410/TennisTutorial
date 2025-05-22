@@ -3809,8 +3809,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 4.9205103, y: 1.84, z: 1.4123607}
-  m_Center: {x: 0, y: 0, z: 1.4108717}
+  m_Size: {x: 5, y: 4, z: 4.5}
+  m_Center: {x: 0, y: 1, z: 1.5}
 --- !u!95 &978640874
 Animator:
   serializedVersion: 5
@@ -3845,7 +3845,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   topSpin:
-    upForce: 5
+    upForce: 6
     hitForce: 8
   flat:
     upForce: 3
@@ -3864,7 +3864,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   aimTarget: {fileID: 809386384}
   ball: {fileID: 1640194199}
-  speed: 3
+  speed: 4
   isAuto: 1
   initPos: {x: 0, y: 0, z: 0}
   currentShot:
@@ -5290,7 +5290,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52895dc40d696cd45907e34f9c881e81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 3
+  speed: 4
   ball: {fileID: 1640194199}
   aimTarget: {fileID: 1308338365}
   targets:
@@ -6634,15 +6634,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   aimTarget: {fileID: 809386384}
   ball: {fileID: 1640194199}
-  speed: 3
+  speed: 5
   isAuto: 1
   initPos: {x: 0, y: 0, z: 0}
   currentShot:
     upForce: 0
     hitForce: 0
-  startChaseRadius: 6
-  maxReachDistance: 8
-  diveReachDistance: 10
+  startChaseRadius: 8
+  maxReachDistance: 10
+  diveReachDistance: 12
   predictTime: 1
   diveDuration: 0.5
   diveSpeedMultiplier: 2.5
@@ -6660,11 +6660,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   topSpin:
-    upForce: 5
+    upForce: 6
     hitForce: 8
   flat:
-    upForce: 3
-    hitForce: 19
+    upForce: 4
+    hitForce: 16
 --- !u!95 &1764984277
 Animator:
   serializedVersion: 5
@@ -6705,8 +6705,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 4.9205103, y: 1.84, z: 1.4123607}
-  m_Center: {x: 0, y: 0, z: 1.4108717}
+  m_Size: {x: 5, y: 4, z: 4.5}
+  m_Center: {x: 0, y: 1, z: 1.5}
 --- !u!114 &1764984282
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7936,7 +7936,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 5.8, y: 0.5, z: 3}
+  m_Size: {x: 5.8, y: 0.5, z: 2.5}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &2088944452
 MeshRenderer:
@@ -8363,7 +8363,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52895dc40d696cd45907e34f9c881e81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 3
+  speed: 5
   ball: {fileID: 1640194199}
   aimTarget: {fileID: 1308338365}
   targets:
